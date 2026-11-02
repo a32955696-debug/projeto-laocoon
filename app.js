@@ -7,12 +7,13 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "docs")));
 
 app.get("/api/mensagem", function (req, res) {
     res.json({ mensagem: "Olá do servidor Node!" });
 });
 
-http.createServer(app).listen(8080, () =>
-    console.log("Servidor rodando local na porta 8080")
+const PORT = process.env.PORT || 8080;
+http.createServer(app).listen(PORT, () =>
+    console.log("Servidor rodando na porta " + PORT)
 );
