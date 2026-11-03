@@ -324,6 +324,73 @@
           transition-duration: 0.01ms !important;
       }
   }
+  /* ---------- Modal de contacto ---------- */
+.modal-contacto {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-md);
+  background: rgba(0, 0, 0, 0.8);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.4s var(--ease-reveal), visibility 0.4s;
+}
+.modal-contacto.aberto { opacity: 1; visibility: visible; pointer-events: auto; }
+
+.modal-caixa {
+  position: relative; width: 100%; max-width: 480px;
+  max-height: 90vh; overflow-y: auto;
+  padding: var(--space-xl);
+  background: #0b0b0b;
+  border: 1px solid var(--white-a20);
+  border-radius: var(--radius-md);
+  transform: translateY(20px);
+  transition: transform 0.4s var(--ease-reveal);
+}
+.modal-contacto.aberto .modal-caixa { transform: translateY(0); }
+
+.modal-caixa h2 {
+  font-family: var(--font-title); font-weight: 400;
+  font-size: 2.2rem; color: var(--color-title);
+  margin-bottom: var(--space-lg);
+}
+.modal-fechar {
+  position: absolute; top: var(--space-md); right: var(--space-md);
+  width: 36px; height: 36px;
+  background: transparent; color: var(--color-fg);
+  border: 1px solid var(--white-a20); border-radius: var(--radius-full);
+  font-size: 1.4rem; line-height: 1;
+}
+.modal-fechar:hover { background: var(--white-a12); }
+
+.modal-caixa label {
+  display: block; margin: var(--space-md) 0 var(--space-2xs);
+  font-family: var(--font-body); font-size: 0.85rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--color-desc);
+}
+.modal-caixa input,
+.modal-caixa textarea {
+  width: 100%; padding: var(--space-sm);
+  background: transparent; color: var(--color-fg);
+  border: 1px solid var(--white-a35); border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: 1rem;
+}
+.modal-caixa textarea { resize: vertical; }
+.modal-caixa input:focus,
+.modal-caixa textarea:focus { outline: none; border-color: var(--color-fg); }
+
+.modal-enviar {
+  margin-top: var(--space-lg); padding: var(--space-xs) var(--space-xl);
+  background: var(--color-fg); color: var(--color-bg);
+  border: none; border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: 1rem;
+  transition: transform 0.3s, background 0.3s;
+}
+.modal-enviar:hover { transform: scale(1.05); background: var(--color-btn-hover-bg); }
+.modal-enviar:disabled { opacity: 0.5; transform: none; }
+
+.modal-estado { margin-top: var(--space-md); min-height: 1.4em; font-size: 0.95rem; color: var(--color-desc); }
+.modal-estado.erro { color: #ff8a8a; }
+.modal-estado.sucesso { color: #9be8a8; }
 </style>
 
 <script type="importmap">
@@ -340,6 +407,27 @@
 
 <div class="cursor-inner"></div>
 <div class="cursor-outer"></div>
+
+<div class="modal-contacto" id="modalContacto" aria-hidden="true">
+  <div class="modal-caixa" role="dialog" aria-modal="true" aria-labelledby="tituloContacto">
+    <button type="button" class="modal-fechar" id="fecharContacto" aria-label="Fechar">&times;</button>
+    <h2 id="tituloContacto">Contacto</h2>
+
+    <form id="formContacto" novalidate>
+      <label for="cNome">Nome</label>
+      <input id="cNome" name="nome" type="text" autocomplete="name" required>
+
+      <label for="cEmail">Email</label>
+      <input id="cEmail" name="email" type="email" autocomplete="email" required>
+
+      <label for="cMensagem">Mensagem</label>
+      <textarea id="cMensagem" name="mensagem" rows="4" required></textarea>
+
+      <button type="submit" class="modal-enviar" id="enviarContacto">Enviar</button>
+      <p class="modal-estado" id="estadoContacto" role="status"></p>
+    </form>
+  </div>
+</div>
 
 <div class="cinematic-container">
   <div class="main-header">
@@ -439,7 +527,7 @@ const sparkData = [];
 
 const sizes = { width: window.innerWidth, height: window.innerHeight };
 
-/* ---------- Background liquid-bronze wave shader ---------- */
+
 function createBackgroundShader() {
     const vertexShader = `
         varying vec2 vUv;
@@ -621,7 +709,7 @@ function createSparks() {
     scene.add(sparkParticles);
 }
 
-/* ---------- Model load ---------- */
+
 function loadModel() {
     const loader = new GLTFLoader();
     const dracoLoader = new DRACOLoader();
@@ -699,7 +787,6 @@ window.addEventListener('mousemove', (event) => {
 });
 window.addEventListener('resize', onWindowResize);
 
-/* ---------- Per-letter title split ---------- */
 function splitTitlesIntoChars() {
     const titles = document.querySelectorAll('.slide-title');
     titles.forEach(title => {
@@ -725,7 +812,6 @@ function splitTitlesIntoChars() {
     });
 }
 
-/* ---------- Grid dots drift ---------- */
 let cachedGridDots = null;
 function updateGridDots(scroll) {
     if (!cachedGridDots) cachedGridDots = document.querySelectorAll('.grid-dot');
@@ -739,7 +825,7 @@ function updateGridDots(scroll) {
     });
 }
 
-/* ---------- Slides + stories progress ---------- */
+
 let cachedNavLinks = null;
 function updateSlides(scroll) {
     const slide1 = document.getElementById('slide-1');
@@ -792,16 +878,14 @@ function setupNavigation() {
         });
     });
 
-    // The Contact button has no real destination yet (href="#"), which
-    // currently just jumps the page to the top. Prevented here so it's
-    // not a broken link — still needs wiring to a mailto:, modal, or route.
+
     const contactBtn = document.querySelector('.contact-btn');
     if (contactBtn) {
         contactBtn.addEventListener('click', (e) => { e.preventDefault(); });
     }
 }
 
-/* ---------- Animation loop ---------- */
+
 function animate() {
     requestAnimationFrame(animate);
     const deltaTime = clock.getDelta();
@@ -940,6 +1024,97 @@ window.addEventListener('DOMContentLoaded', () => {
     animate();
     setupNavigation();
 });
+</script>
+<script>
+(function () {
+  const modal = document.getElementById("modalContacto");
+  const form = document.getElementById("formContacto");
+  const estado = document.getElementById("estadoContacto");
+  const botaoEnviar = document.getElementById("enviarContacto");
+  const botaoAbrir = document.querySelector(".contact-btn");
+  const botaoFechar = document.getElementById("fecharContacto");
+
+  if (!modal || !form || !botaoAbrir) return;
+
+  function abrir() {
+    modal.classList.add("aberto");
+    modal.setAttribute("aria-hidden", "false");
+    setTimeout(function () { form.elements.nome.focus(); }, 50);
+  }
+
+  function fechar() {
+    modal.classList.remove("aberto");
+    modal.setAttribute("aria-hidden", "true");
+    botaoAbrir.focus();
+  }
+
+  function mostrar(texto, tipo) {
+    estado.textContent = texto;
+    estado.className = "modal-estado" + (tipo ? " " + tipo : "");
+  }
+
+  botaoAbrir.addEventListener("click", function (e) {
+    e.preventDefault();
+    abrir();
+  });
+
+  botaoFechar.addEventListener("click", fechar);
+
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) fechar();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal.classList.contains("aberto")) fechar();
+  });
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    mostrar("", "");
+
+    const dados = {
+      nome: form.elements.nome.value.trim(),
+      email: form.elements.email.value.trim(),
+      mensagem: form.elements.mensagem.value.trim()
+    };
+
+    if (!dados.nome || !dados.email || !dados.mensagem) {
+      mostrar("Preencha nome, email e mensagem.", "erro");
+      return;
+    }
+    if (!dados.email.includes("@")) {
+      mostrar("Escreva um email válido.", "erro");
+      return;
+    }
+
+    botaoEnviar.disabled = true;
+    botaoEnviar.textContent = "A enviar...";
+
+    try {
+      const resposta = await fetch("/api/contacto", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+      });
+
+      let corpo = {};
+      try { corpo = await resposta.json(); } catch (_) {}
+
+      if (!resposta.ok) {
+        throw new Error(corpo.erro || "Não foi possível enviar a mensagem.");
+      }
+
+      mostrar(corpo.resposta || "Mensagem enviada. Obrigado!", "sucesso");
+      form.reset();
+      setTimeout(fechar, 2000);
+    } catch (erro) {
+      mostrar(erro.message || "Sem ligação ao servidor. Tente mais tarde.", "erro");
+    } finally {
+      botaoEnviar.disabled = false;
+      botaoEnviar.textContent = "Enviar";
+    }
+  });
+})();
 </script>
 </body>
 </html>
