@@ -42,12 +42,18 @@ app.post("/api/contacto", async function (req, res) {
         console.log("Nova mensagem de contacto guardada:", nome.trim());
         res.status(201).json({ ok: true, resposta: "Mensagem recebida. Obrigado!" });
     } catch (erro) {
-        console.error("Erro ao guardar contacto:", erro.message);
+        console.error(
+    "Erro ao guardar contacto:",
+    erro.code || "",
+    erro.message || "",
+    (erro.errors || []).map(function (e) { return e.code; }).join(",")
+);
         res.status(500).json({ erro: "Não foi possível guardar a mensagem. Tente mais tarde." });
     }
 });
 
 const PORT = process.env.PORT || 8080;
+console.log("DATABASE_URL definida:", Boolean(process.env.DATABASE_URL));
 
 http.createServer(app).listen(PORT, () =>
     console.log("Servidor rodando na porta " + PORT)
